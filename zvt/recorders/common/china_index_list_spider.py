@@ -3,8 +3,8 @@
 import io
 
 import demjson
-import requests
 import pandas as pd
+import requests
 
 from zvt.api.common import china_stock_code_to_id
 from zvt.api.technical import init_securities, df_to_db
@@ -35,7 +35,7 @@ class ChinaIndexListSpider(Recorder):
         抓取上证、中证指数列表
         """
         url = 'http://www.csindex.com.cn/zh-CN/indices/index' \
-            '?page={}&page_size={}&data_type=json&class_1=1&class_2=2&class_7=7&class_10=10'
+              '?page={}&page_size={}&data_type=json&class_1=1&class_2=2&class_7=7&class_10=10'
 
         index_list = []
         page = 1
@@ -91,7 +91,9 @@ class ChinaIndexListSpider(Recorder):
 
             index_id = f'index_cn_{index_code}'
             response_df = response_df[['成分券代码Constituent Code']].rename(columns={'成分券代码Constituent Code': 'stock_code'})
-            response_df['id'] = response_df['stock_code'].apply(lambda x: f'{index_id}_{china_stock_code_to_id(str(x))}')
+            response_df['id'] = response_df['stock_code'].apply(
+                lambda x: f'{index_id}_{china_stock_code_to_id(str(x))}')
+            response_df['entity_id'] = response_df['id']
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
             response_df['index_id'] = index_id
             response_df.drop('stock_code', axis=1, inplace=True)
@@ -136,6 +138,7 @@ class ChinaIndexListSpider(Recorder):
             index_id = f'index_cn_{index_code}'
             response_df = response_df[['证券代码']]
             response_df['id'] = response_df['证券代码'].apply(lambda x: f'{index_id}_{china_stock_code_to_id(str(x))}')
+            response_df['entity_id'] = response_df['id']
             response_df['stock_id'] = response_df['证券代码'].apply(lambda x: china_stock_code_to_id(str(x)))
             response_df['index_id'] = index_id
             response_df.drop('证券代码', axis=1, inplace=True)
@@ -208,7 +211,9 @@ class ChinaIndexListSpider(Recorder):
                 response_df = response_df[['证券代码']]
 
             response_df.columns = ['stock_code']
-            response_df['id'] = response_df['stock_code'].apply(lambda x: f'{index_id}_{china_stock_code_to_id(str(x))}')
+            response_df['id'] = response_df['stock_code'].apply(
+                lambda x: f'{index_id}_{china_stock_code_to_id(str(x))}')
+            response_df['entity_id'] = response_df['id']
             response_df['stock_id'] = response_df['stock_code'].apply(lambda x: china_stock_code_to_id(str(x)))
             response_df['index_id'] = index_id
             response_df.drop('stock_code', axis=1, inplace=True)
@@ -222,14 +227,15 @@ class ChinaIndexListSpider(Recorder):
         df['timestamp'] = df['timestamp'].apply(lambda x: to_pd_timestamp(x))
         df['online_date'] = df['online_date'].apply(lambda x: to_pd_timestamp(x))
         df['id'] = df['code'].apply(lambda code: f'index_cn_{code}')
+        df['entity_id'] = df['id']
         df['exchange'] = 'cn'
-        df['type'] = 'index'
+        df['entity_type'] = 'index'
         df['is_delisted'] = False
 
         df = df.dropna(axis=0, how='any')
         df = df.drop_duplicates(subset='id', keep='last')
 
-        init_securities(df, security_type='index', provider=self.provider)
+        init_securities(df, entity_type='index', provider=self.provider)
 
 
 if __name__ == '__main__':

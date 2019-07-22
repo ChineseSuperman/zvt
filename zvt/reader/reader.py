@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 
 from zvt.api.common import get_data, Stock1DKdata, get_exchange
 from zvt.charts import Chart
-from zvt.domain import SecurityType, TradingLevel, Provider
+from zvt.domain import EntityType, IntervalLevel, Provider
 from zvt.utils.pd_utils import index_df_with_category_time, df_is_not_null
 from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
@@ -49,7 +49,7 @@ class DataReader(object):
     def __init__(self,
                  data_schema: object,
                  security_list: List[str] = None,
-                 security_type: Union[str, SecurityType] = SecurityType.stock,
+                 entity_type: Union[str, EntityType] = EntityType.stock,
                  exchanges: List[str] = ['sh', 'sz'],
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
@@ -58,19 +58,19 @@ class DataReader(object):
                  columns: List = None,
                  filters: List = None,
                  provider: Union[str, Provider] = 'eastmoney',
-                 level: TradingLevel = TradingLevel.LEVEL_1DAY,
+                 level: IntervalLevel = IntervalLevel.LEVEL_1DAY,
                  real_time: bool = False,
                  refresh_interval: int = 10,
-                 category_field: str = 'security_id') -> None:
+                 category_field: str = 'entity_id') -> None:
         """
 
         Parameters
         ----------
         data_schema :
         security_list : use security_list if possible
-        security_type :
+        entity_type :
         exchanges :
-        codes : security_type + exchanges + codes make security_list
+        codes : entity_type + exchanges + codes make security_list
         the_timestamp : if set,just read the data in specific time
         start_timestamp :
         end_timestamp :
@@ -94,26 +94,26 @@ class DataReader(object):
         self.start_timestamp = to_pd_timestamp(self.start_timestamp)
         self.end_timestamp = to_pd_timestamp(self.end_timestamp)
 
-        self.security_type = security_type
+        self.entity_type = entity_type
         self.exchanges = exchanges
         self.codes = codes
         self.security_list = security_list
 
         if not self.security_list:
-            # if not (self.security_type and self.exchanges):
+            # if not (self.entity_type and self.exchanges):
             #     raise Exception(
-            #         'you should set (security_type,exchanges) or (security_type,exchanges) or (security_list) for the reader')
+            #         'you should set (entity_type,exchanges) or (entity_type,exchanges) or (security_list) for the reader')
 
             self.security_list = []
-            if self.security_type and self.exchanges and self.codes:
+            if self.entity_type and self.exchanges and self.codes:
                 # for china stock,just need codes
-                if self.security_type == SecurityType.stock:
+                if self.entity_type == EntityType.stock:
                     for code in self.codes:
-                        self.security_list.append('{}_{}_{}'.format(self.security_type.value, get_exchange(code), code))
+                        self.security_list.append('{}_{}_{}'.format(self.entity_type.value, get_exchange(code), code))
                 else:
                     for exchange in self.exchanges:
                         for code in self.codes:
-                            self.security_list.append('{}_{}_{}'.format(self.security_type.value, exchange, code))
+                            self.security_list.append('{}_{}_{}'.format(self.entity_type.value, exchange, code))
 
         self.provider = provider
         self.level = level
@@ -137,7 +137,7 @@ class DataReader(object):
 
     def load_data(self):
         if self.security_list:
-            self.data_df = get_data(data_schema=self.data_schema, security_list=self.security_list,
+            self.data_df = get_data(data_schema=self.data_schema, entity_ids=self.security_list,
                                     provider=self.provider, columns=self.columns,
                                     start_timestamp=self.start_timestamp,
                                     end_timestamp=self.end_timestamp, filters=self.filters, level=self.level)

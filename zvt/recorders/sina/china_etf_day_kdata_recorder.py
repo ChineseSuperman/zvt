@@ -8,7 +8,7 @@ import requests
 from zvt.api.common import generate_kdata_id
 from zvt.recorders.consts import EASTMONEY_ETF_NET_VALUE_HEADER
 from zvt.api.technical import get_kdata
-from zvt.domain import Index, Provider, SecurityType, StoreCategory, TradingLevel, Index1DKdata
+from zvt.domain import Index, Provider, EntityType, StoreCategory, IntervalLevel, Index1DKdata
 from zvt.recorders.recorder import ApiWrapper, FixedCycleDataRecorder, TimeSeriesFetchingStyle
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import init_process_log
@@ -49,18 +49,18 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
           'symbol={}{}&scale=240&&datalen={}&ma=no'
     api_wrapper = MyApiWrapper()
 
-    def __init__(self, security_type=SecurityType.index, exchanges=['sh', 'sz'], codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.index, exchanges=['sh', 'sz'], codes=None, batch_size=10,
                  force_update=False, sleeping_time=5, fetching_style=TimeSeriesFetchingStyle.end_size,
-                 default_size=2000, contain_unfinished_data=False, level=TradingLevel.LEVEL_1DAY,
+                 default_size=2000, contain_unfinished_data=False, level=IntervalLevel.LEVEL_1DAY,
                  one_shot=True) -> None:
-        super().__init__(security_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
+        super().__init__(entity_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
                          default_size, contain_unfinished_data, level, one_shot)
 
     def get_data_map(self):
         return {}
 
     def generate_domain_id(self, security_item, original_data):
-        return generate_kdata_id(security_id=security_item.id, timestamp=original_data['timestamp'], level=self.level)
+        return generate_kdata_id(entity_id=security_item.id, timestamp=original_data['timestamp'], level=self.level)
 
     def generate_request_param(self, security_item, start, end, size, timestamp):
         # 此 url 不支持分页，如果超过我们想取的条数，则只能取最大条数
@@ -73,8 +73,8 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             'size': size
         }
 
-    def on_finish(self, security_item):
-        kdatas = get_kdata(security_id=security_item.id, level=TradingLevel.LEVEL_1DAY.value,
+    def on_finish_entity(self, entity):
+        kdatas = get_kdata(entity_id=entity.id, level=IntervalLevel.LEVEL_1DAY.value,
                            order=Index1DKdata.timestamp.asc(),
                            return_type='domain', session=self.session,
                            filters=[Index1DKdata.cumulative_net_value.is_(None)])
@@ -84,7 +84,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
             end = kdatas[-1].timestamp
 
             # 从东方财富获取基金累计净值
-            df = self.fetch_cumulative_net_value(security_item, start, end)
+            df = self.fetch_cumulative_net_value(entity, start, end)
 
             if df is not None and not df.empty:
                 for kdata in kdatas:
@@ -92,7 +92,7 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
                         kdata.cumulative_net_value = df.loc[kdata.timestamp, 'LJJZ']
                         kdata.change_pct = df.loc[kdata.timestamp, 'JZZZL']
                 self.session.commit()
-                self.logger.info(f'{security_item.code} - {security_item.name}累计净值更新完成...')
+                self.logger.info(f'{entity.code} - {entity.name}累计净值更新完成...')
 
     def fetch_cumulative_net_value(self, security_item, start, end) -> pd.DataFrame:
         query_url = 'http://api.fund.eastmoney.com/f10/lsjz?' \
@@ -127,5 +127,5 @@ class ChinaETFDayKdataRecorder(FixedCycleDataRecorder):
 
 if __name__ == '__main__':
     init_process_log('sina_china_etf_day_kdata.log')
-    ChinaETFDayKdataRecorder(level=TradingLevel.LEVEL_1DAY).run()
+    ChinaETFDayKdataRecorder(level=IntervalLevel.LEVEL_1DAY).run()
 

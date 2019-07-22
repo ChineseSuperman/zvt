@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objs as go
 
 from zvt.charts import Chart
-from zvt.domain import SecurityType, TradingLevel, Provider
+from zvt.domain import EntityType, IntervalLevel, Provider
 from zvt.reader.reader import DataReader, DataListener
 from zvt.utils.pd_utils import index_df_with_security_time
 
@@ -23,7 +23,7 @@ class Factor(DataReader, DataListener):
     def __init__(self,
                  data_schema: object,
                  security_list: List[str] = None,
-                 security_type: Union[str, SecurityType] = SecurityType.stock,
+                 entity_type: Union[str, EntityType] = EntityType.stock,
                  exchanges: List[str] = ['sh', 'sz'],
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
@@ -32,15 +32,15 @@ class Factor(DataReader, DataListener):
                  columns: List = None,
                  filters: List = None,
                  provider: Union[str, Provider] = 'eastmoney',
-                 level: TradingLevel = TradingLevel.LEVEL_1DAY,
+                 level: IntervalLevel = IntervalLevel.LEVEL_1DAY,
                  real_time: bool = False,
                  refresh_interval: int = 10,
-                 category_field: str = 'security_id',
+                 category_field: str = 'entity_id',
                  # child added arguments
                  keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill',
                  effective_number: int = 10) -> None:
-        super().__init__(data_schema, security_list, security_type, exchanges, codes, the_timestamp, start_timestamp,
+        super().__init__(data_schema, security_list, entity_type, exchanges, codes, the_timestamp, start_timestamp,
                          end_timestamp, columns, filters, provider, level, real_time, refresh_interval, category_field)
 
         self.factor_name = type(self).__name__.lower()
@@ -101,7 +101,7 @@ class Factor(DataReader, DataListener):
         if self.keep_all_timestamp:
             idx = pd.date_range(self.start_timestamp, self.end_timestamp)
             new_index = pd.MultiIndex.from_product([self.result_df.index.levels[0], idx],
-                                                   names=['security_id', 'timestamp'])
+                                                   names=['entity_id', 'timestamp'])
             self.result_df = self.result_df.loc[~self.result_df.index.duplicated(keep='first')]
             self.result_df = self.result_df.reindex(new_index)
             self.result_df = self.result_df.fillna(method=self.fill_method, limit=self.effective_number)
@@ -140,7 +140,7 @@ class ScoreFactor(Factor):
 
     def __init__(self, data_schema: object,
                  security_list: List[str] = None,
-                 security_type: Union[str, SecurityType] = SecurityType.stock,
+                 entity_type: Union[str, EntityType] = EntityType.stock,
                  exchanges: List[str] = ['sh', 'sz'],
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
@@ -148,9 +148,9 @@ class ScoreFactor(Factor):
                  end_timestamp: Union[str, pd.Timestamp] = None,
                  columns: List = None, filters: List = None,
                  provider: Union[str, Provider] = 'eastmoney',
-                 level: TradingLevel = TradingLevel.LEVEL_1DAY,
+                 level: IntervalLevel = IntervalLevel.LEVEL_1DAY,
                  real_time: bool = False, refresh_interval: int = 10,
-                 category_field: str = 'security_id',
+                 category_field: str = 'entity_id',
                  keep_all_timestamp: bool = False,
                  fill_method: str = 'ffill',
                  effective_number: int = 10,
@@ -165,7 +165,7 @@ class ScoreFactor(Factor):
         self.breadth_computing_method = breadth_computing_method
         self.breadth_computing_param = breadth_computing_param
 
-        super().__init__(data_schema, security_list, security_type, exchanges, codes, the_timestamp, start_timestamp,
+        super().__init__(data_schema, security_list, entity_type, exchanges, codes, the_timestamp, start_timestamp,
                          end_timestamp, columns, filters, provider, level, real_time, refresh_interval, category_field,
                          keep_all_timestamp, fill_method, effective_number)
 
@@ -211,7 +211,7 @@ class ScoreFactor(Factor):
             self.logger.info('factor:{},quantile:\n{}'.format(self.factor_name, self.quantile))
 
             self.result_df = self.depth_df.copy()
-            self.result_df.reset_index(inplace=True, level='security_id')
+            self.result_df.reset_index(inplace=True, level='entity_id')
             self.result_df['quantile'] = None
             for timestamp in self.quantile.index.levels[0]:
                 length = len(self.result_df.loc[self.result_df.index == timestamp, 'quantile'])
@@ -220,7 +220,7 @@ class ScoreFactor(Factor):
 
             self.logger.info('factor:{},df with quantile:\n{}'.format(self.factor_name, self.result_df))
 
-            # self.result_df = self.result_df.set_index(['security_id'], append=True)
+            # self.result_df = self.result_df.set_index(['entity_id'], append=True)
             # self.result_df = self.result_df.sort_index(level=[0, 1])
             #
             # self.logger.info(self.result_df)
@@ -256,7 +256,7 @@ class StateFactor(Factor):
     factor_type = FactorType.state
     states = []
 
-    def get_state(self, timestamp, security_id):
+    def get_state(self, timestamp, entity_id):
         pass
 
     def get_short_state(self):

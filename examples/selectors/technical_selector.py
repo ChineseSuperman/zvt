@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-from zvt.domain import SecurityType, TradingLevel
+from zvt.domain import EntityType, IntervalLevel
 from zvt.factors.technical_factor import BullFactor
 from zvt.selectors.selector import TargetSelector
 from zvt.settings import SAMPLE_STOCK_CODES
 
 
 class TechnicalSelector(TargetSelector):
-    def __init__(self, security_list=None, security_type=SecurityType.stock, exchanges=['sh', 'sz'], codes=None,
+    def __init__(self, security_list=None, security_type=EntityType.stock, exchanges=['sh', 'sz'], codes=None,
                  the_timestamp=None, start_timestamp=None, end_timestamp=None, long_threshold=0.8, short_threshold=-0.8,
-                 level=TradingLevel.LEVEL_1DAY,
+                 level=IntervalLevel.LEVEL_1DAY,
                  provider='joinquant') -> None:
         super().__init__(security_list, security_type, exchanges, codes, the_timestamp, start_timestamp, end_timestamp,
                          long_threshold, short_threshold, level, provider)

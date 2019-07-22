@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, DateTime, Float
+from sqlalchemy import Column, String, Float
 
-from zvt.domain.common import MoneyFlowBase
+from zvt.domain.common import MoneyFlowBase, BaseMixin
 
 
 # 板块资金流向
-class IndexMoneyFlow(MoneyFlowBase):
+class IndexMoneyFlow(MoneyFlowBase, BaseMixin):
     __tablename__ = 'index_money_flow'
 
-    id = Column(String(length=128), primary_key=True)
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
 
@@ -42,12 +39,9 @@ class IndexMoneyFlow(MoneyFlowBase):
     net_small_inflow_rate = Column(Float)
 
 
-class StockMoneyFlow(MoneyFlowBase):
+class StockMoneyFlow(MoneyFlowBase, BaseMixin):
     __tablename__ = 'stock_money_flow'
 
-    id = Column(String(length=128), primary_key=True)
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
 

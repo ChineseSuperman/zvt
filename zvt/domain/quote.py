@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, DateTime, Float
+from sqlalchemy import Column, String, Float
 
 from zvt.domain.common import Stock1DKdataBase, Index1DKdataBase, Stock1HKdataBase, Stock15MKdataBase, \
     Coin15MKdataBase, Coin1HKdataBase, Coin1DKdataBase, Coin1MKdataBase, Coin5MKdataBase, Coin1WKKdataBase, \
-    Stock1MKdataBase, Stock5MKdataBase, Stock30MKdataBase, Stock1WKKdataBase, CoinTickKdataBase
+    Stock1MKdataBase, Stock5MKdataBase, Stock30MKdataBase, Stock1WKKdataBase, CoinTickKdataBase, BaseMixin
 
 
-class StockKdataCommon(object):
-    id = Column(String(length=128), primary_key=True)
+class StockKdataCommon(BaseMixin):
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
     # level = Column(Enum(TradingLevel, values_callable=enum_value))
@@ -35,11 +32,8 @@ class StockKdataCommon(object):
     factor = Column(Float)
 
 
-class KdataCommon(object):
-    id = Column(String(length=128), primary_key=True)
+class KdataCommon(BaseMixin):
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
     level = Column(String(length=32))
@@ -52,11 +46,8 @@ class KdataCommon(object):
     turnover = Column(Float)
 
 
-class TickCommon(object):
-    id = Column(String(length=128), primary_key=True)
+class TickCommon(BaseMixin):
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
     level = Column(String(length=32))

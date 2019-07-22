@@ -15,7 +15,7 @@ class Trader(BusinessBase):
     trader_name = Column(String(length=128))
 
     security_list = Column(String(length=1024))
-    security_type = Column(String(length=128))
+    entity_type = Column(String(length=128))
     exchanges = Column(String(length=128))
     codes = Column(String(length=128))
     start_timestamp = Column(DateTime)
@@ -63,7 +63,7 @@ class Position(BusinessBase):
     # 机器人名字
     trader_name = Column(String(length=128))
     # 证券id
-    security_id = Column(String(length=128))
+    entity_id = Column(String(length=128))
     # 账户id
     sim_account_id = Column(Integer, ForeignKey('sim_accounts.id'))
     sim_account = relationship("SimAccount", back_populates="positions")
@@ -98,7 +98,7 @@ class Order(BusinessBase):
     # 机器人名字
     trader_name = Column(String(length=128))
     # 证券id
-    security_id = Column(String(length=128))
+    entity_id = Column(String(length=128))
     # 订单价格
     order_price = Column(Float)
     # 订单数量

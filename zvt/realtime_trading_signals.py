@@ -9,14 +9,14 @@ from dash.dependencies import Input, Output
 from zvt.api.business import get_trader
 from zvt.api.technical import get_current_price
 from zvt.charts.dcc_components import get_trader_detail_figures
-from zvt.domain import TradingLevel
+from zvt.domain import IntervalLevel
 from zvt.reader.business_reader import AccountReader, OrderReader
 
 trader = 'singlecointrader'
 security = 'coin_binance_EOS/USDT'
 
 trader_domain = get_trader(trader_name=trader, return_type='domain')[0]
-account_reader = AccountReader(trader_names=['singlecointrader'], level=TradingLevel.LEVEL_1MIN)
+account_reader = AccountReader(trader_names=['singlecointrader'], level=IntervalLevel.LEVEL_1MIN)
 order_reader = OrderReader(trader_names=['singlecointrader'])
 
 

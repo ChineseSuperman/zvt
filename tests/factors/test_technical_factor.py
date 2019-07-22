@@ -4,15 +4,15 @@ from ..context import init_context
 init_context()
 
 from zvt.factors.technical_factor import TechnicalFactor, CrossMaFactor
-from zvt.domain import SecurityType, TradingLevel, Provider
+from zvt.domain import EntityType, IntervalLevel, Provider
 
 
 def test_ma():
-    factor = TechnicalFactor(security_type=SecurityType.stock,
+    factor = TechnicalFactor(security_type=EntityType.stock,
                              codes=['000338'],
                              start_timestamp='2019-01-01',
                              end_timestamp='2019-06-10',
-                             level=TradingLevel.LEVEL_1DAY,
+                             level=IntervalLevel.LEVEL_1DAY,
                              provider=Provider.JOINQUANT,
                              indicators=['ma', 'ma', 'ma'],
                              indicators_param=[{'window': 5}, {'window': 10}, {'window': 30}])
@@ -39,11 +39,11 @@ def test_ma():
 
 
 def test_macd():
-    factor = TechnicalFactor(security_type=SecurityType.stock,
+    factor = TechnicalFactor(security_type=EntityType.stock,
                              codes=['000338'],
                              start_timestamp='2019-01-01',
                              end_timestamp='2019-06-10',
-                             level=TradingLevel.LEVEL_1DAY,
+                             level=IntervalLevel.LEVEL_1DAY,
                              provider=Provider.JOINQUANT,
                              indicators=['macd'],
                              indicators_param=[{'slow': 26, 'fast': 12, 'n': 9}])
@@ -70,11 +70,11 @@ def test_macd():
 
 
 def test_cross_ma():
-    factor = CrossMaFactor(security_type=SecurityType.stock,
+    factor = CrossMaFactor(security_type=EntityType.stock,
                            codes=['000338'],
                            start_timestamp='2019-01-01',
                            end_timestamp='2019-06-10',
-                           level=TradingLevel.LEVEL_1DAY,
+                           level=IntervalLevel.LEVEL_1DAY,
                            provider=Provider.JOINQUANT,
                            short_window=5,
                            long_window=10)

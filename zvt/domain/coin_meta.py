@@ -1,15 +1,13 @@
 # 数字货币
-from sqlalchemy import Column, String, DateTime
+from sqlalchemy import Column, String
 
-from zvt.domain.common import CoinMetaBase
+from zvt.domain.common import CoinMetaBase, BaseMixin
 
 
-class Coin(CoinMetaBase):
+class Coin(CoinMetaBase, BaseMixin):
     __tablename__ = 'coin'
 
-    id = Column(String(length=128), primary_key=True)
-    timestamp = Column(DateTime)
+    entity_type = Column(String(length=64))
     exchange = Column(String(length=32))
-    type = Column(String(length=64))
     code = Column(String(length=32))
     name = Column(String(length=32))

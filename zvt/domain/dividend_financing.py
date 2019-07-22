@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Float
 
-from zvt.domain.common import DividendFinancingBase
+from zvt.domain.common import DividendFinancingBase, BaseMixin
 
 
-class DividendFinancing(DividendFinancingBase):
+class DividendFinancing(DividendFinancingBase, BaseMixin):
     __tablename__ = 'dividend_financing'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     # 分红总额
@@ -28,14 +25,10 @@ class DividendFinancing(DividendFinancingBase):
     rights_raising_fund = Column(Float)
 
 
-class DividendDetail(DividendFinancingBase):
+class DividendDetail(DividendFinancingBase, BaseMixin):
     __tablename__ = "dividend_detail"
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # =公告日
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     # 公告日
@@ -49,13 +42,10 @@ class DividendDetail(DividendFinancingBase):
     dividend = Column(String(length=128))
 
 
-class SPODetail(DividendFinancingBase):
+class SPODetail(DividendFinancingBase, BaseMixin):
     __tablename__ = "spo_detail"
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     spo_issues = Column(Float)
@@ -63,13 +53,10 @@ class SPODetail(DividendFinancingBase):
     spo_raising_fund = Column(Float)
 
 
-class RightsIssueDetail(DividendFinancingBase):
+class RightsIssueDetail(DividendFinancingBase, BaseMixin):
     __tablename__ = "rights_issue_detail"
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     # 配股

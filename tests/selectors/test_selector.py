@@ -4,7 +4,7 @@ from ..context import init_context
 
 init_context()
 
-from zvt.domain import SecurityType, TradingLevel, Provider
+from zvt.domain import EntityType, IntervalLevel, Provider
 from zvt.selectors.technical_selector import TechnicalSelector
 from zvt.selectors.selector import TargetSelector
 
@@ -24,7 +24,7 @@ def test_cross_ma_selector():
                                          security_type=security_type,
                                          start_timestamp=start_timestamp,
                                          end_timestamp=end_timestamp,
-                                         level=TradingLevel.LEVEL_1DAY))
+                                         level=IntervalLevel.LEVEL_1DAY))
     my_selector.run()
     print(my_selector.open_long_df)
     print(my_selector.open_short_df)
@@ -32,9 +32,9 @@ def test_cross_ma_selector():
 
 
 def test_technical_selector():
-    selector = TechnicalSelector(security_type=SecurityType.stock, start_timestamp='2019-01-01',
+    selector = TechnicalSelector(security_type=EntityType.stock, start_timestamp='2019-01-01',
                                  end_timestamp='2019-06-10',
-                                 level=TradingLevel.LEVEL_1DAY,
+                                 level=IntervalLevel.LEVEL_1DAY,
                                  provider=Provider.JOINQUANT)
 
     selector.run()

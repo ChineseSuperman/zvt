@@ -6,8 +6,8 @@ import pandas as pd
 import plotly
 import plotly.graph_objs as go
 
-from zvt.api.common import decode_security_id
-from zvt.domain import SecurityType
+from zvt.api.common import decode_entity_id
+from zvt.domain import EntityType
 from zvt.settings import UI_PATH
 from zvt.utils.pd_utils import fill_with_same_index, df_is_not_null
 from zvt.utils.time_utils import TIME_FORMAT_ISO8601, now_time_str
@@ -21,7 +21,7 @@ def get_ui_path(name):
 
 class Chart(object):
     def __init__(self,
-                 category_field: str = 'security_id',
+                 category_field: str = 'entity_id',
                  # child added arguments
                  figures: List[go._BaseTraceType] = [go.Scatter],
                  modes: List[str] = ['lines'],
@@ -130,10 +130,10 @@ class Chart(object):
             for i, figure in enumerate(self.figures):
 
                 if figure == go.Candlestick:
-                    security_type, _, _ = decode_security_id(series_name)
+                    entity_type, _, _ = decode_entity_id(series_name)
                     trace_name = '{}_kdata'.format(series_name)
 
-                    if security_type == SecurityType.stock:
+                    if entity_type == EntityType.stock:
                         open = df.loc[:, 'qfq_open']
                         close = df.loc[:, 'qfq_close']
                         high = df.loc[:, 'qfq_high']

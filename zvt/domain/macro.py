@@ -1,29 +1,23 @@
 # -*- coding: utf-8 -*-
-from sqlalchemy import Column, String, DateTime, Enum, Float
+from sqlalchemy import Column, String, Float
 
-from zvt.domain.common import Provider, enum_value, MacroBase
+from zvt.domain.common import MacroBase, BaseMixin
 
 
-class GDP(MacroBase):
+class GDP(MacroBase, BaseMixin):
     __tablename__ = 'gdp'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
 
     value = Column(Float)
 
 
-class StockSummary(MacroBase):
+class StockSummary(MacroBase, BaseMixin):
     __tablename__ = 'stock_summary'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
     name = Column(String(length=32))
 

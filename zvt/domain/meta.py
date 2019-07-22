@@ -2,7 +2,7 @@
 from sqlalchemy import Column, String, DateTime, Boolean, BigInteger, Float, ForeignKey
 from sqlalchemy.orm import relationship
 
-from zvt.domain.common import MetaBase
+from zvt.domain.common import MetaBase, BaseMixin
 
 
 # 指数和个股为 many to many关系
@@ -19,13 +19,11 @@ class StockIndex(MetaBase):
 
 
 # 指数
-class Index(MetaBase):
+class Index(MetaBase, BaseMixin):
     __tablename__ = 'indices'
 
-    id = Column(String(length=128), primary_key=True)
-    timestamp = Column(DateTime)
+    entity_type = Column(String(length=64))
     exchange = Column(String(length=32))
-    type = Column(String(length=64))
     code = Column(String(length=32))
     name = Column(String(length=32))
 
@@ -44,13 +42,11 @@ class Index(MetaBase):
 
 
 # 个股
-class Stock(MetaBase):
+class Stock(MetaBase, BaseMixin):
     __tablename__ = 'stocks'
 
-    id = Column(String(length=128), primary_key=True)
-    timestamp = Column(DateTime)
+    entity_otype = Column(String(length=64))
     exchange = Column(String(length=32))
-    type = Column(String(length=64))
     code = Column(String(length=32))
     name = Column(String(length=32))
 

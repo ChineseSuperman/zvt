@@ -3,14 +3,14 @@ from typing import List, Union
 
 import pandas as pd
 
-from zvt.domain import SecurityType, ManagerTrading, Provider, TradingLevel
+from zvt.domain import EntityType, ManagerTrading, Provider, IntervalLevel
 from zvt.factors.factor import FilterFactor
 
 
 class ManagerGiveUpFactor(FilterFactor):
     def __init__(self,
                  security_list: List[str] = None,
-                 security_type: Union[str, SecurityType] = SecurityType.stock,
+                 entity_type: Union[str, EntityType] = EntityType.stock,
                  exchanges: List[str] = ['sh', 'sz'],
                  codes: List[str] = None,
                  the_timestamp: Union[str, pd.Timestamp] = None,
@@ -19,13 +19,13 @@ class ManagerGiveUpFactor(FilterFactor):
                  columns=[ManagerTrading.volume],
                  filters: List = [ManagerTrading.trading_way == '减持'],
                  provider: Union[str, Provider] = 'eastmoney',
-                 level: TradingLevel = TradingLevel.LEVEL_1DAY,
+                 level: IntervalLevel = IntervalLevel.LEVEL_1DAY,
                  real_time: bool = False, refresh_interval: int = 10,
-                 category_field: str = 'security_id',
+                 category_field: str = 'entity_id',
                  keep_all_timestamp: bool = True,
                  fill_method: str = 'ffill',
                  effective_number: int = 10) -> None:
-        super().__init__(ManagerTrading, security_list, security_type, exchanges, codes, the_timestamp, start_timestamp,
+        super().__init__(ManagerTrading, security_list, entity_type, exchanges, codes, the_timestamp, start_timestamp,
                          end_timestamp, columns, filters, provider, level, real_time, refresh_interval, category_field,
                          keep_all_timestamp, fill_method, effective_number)
 

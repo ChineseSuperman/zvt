@@ -3,12 +3,12 @@ from typing import List, Union
 
 import pandas as pd
 
-from zvt.domain.common import SecurityType, Provider, TradingLevel
+from zvt.domain.common import EntityType, Provider, IntervalLevel
 from zvt.trader.trader import Trader
 
 
 class CoinTrader(Trader):
-    security_type = SecurityType.coin
+    entity_type = EntityType.coin
 
     def __init__(self,
                  security_list: List[str] = None,
@@ -17,7 +17,7 @@ class CoinTrader(Trader):
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
                  provider: Union[str, Provider] = Provider.CCXT,
-                 level: Union[str, TradingLevel] = TradingLevel.LEVEL_1DAY,
+                 level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY,
                  trader_name: str = None,
                  real_time: bool = False,
                  kdata_use_begin_time: bool = True) -> None:
@@ -26,7 +26,7 @@ class CoinTrader(Trader):
 
 
 class StockTrader(Trader):
-    security_type = SecurityType.stock
+    entity_type = EntityType.stock
 
     def __init__(self, security_list: List[str] = None,
                  exchanges: List[str] = ['sh', 'sz'],
@@ -34,7 +34,7 @@ class StockTrader(Trader):
                  start_timestamp: Union[str, pd.Timestamp] = None,
                  end_timestamp: Union[str, pd.Timestamp] = None,
                  provider: Union[str, Provider] = Provider.JOINQUANT,
-                 level: Union[str, TradingLevel] = TradingLevel.LEVEL_1DAY,
+                 level: Union[str, IntervalLevel] = IntervalLevel.LEVEL_1DAY,
                  trader_name: str = None,
                  real_time: bool = False,
                  kdata_use_begin_time: bool = False) -> None:

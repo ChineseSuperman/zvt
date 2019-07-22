@@ -2,7 +2,7 @@ import demjson
 import pandas as pd
 import requests
 
-from zvt.domain import Provider, StoreCategory, SecurityType, Index
+from zvt.domain import Provider, StoreCategory, EntityType, Index
 from zvt.domain.macro import StockSummary
 from zvt.recorders.consts import DEFAULT_SH_SUMMARY_HEADER
 from zvt.recorders.recorder import TimestampsDataRecorder, ApiWrapper, TimeSeriesFetchingStyle
@@ -13,7 +13,7 @@ from zvt.utils.utils import to_float
 #     id = Column(String(length=128), primary_key=True)
 #     provider = Column(Enum(Provider, values_callable=enum_value), primary_key=True)
 #     timestamp = Column(DateTime)
-#     security_id = Column(String(length=128))
+#     entity_id = Column(String(length=128))
 #     code = Column(String(length=32))
 #     name = Column(String(length=32))
 #
@@ -56,16 +56,16 @@ class StockSummaryRecorder(TimestampsDataRecorder):
     url = 'http://query.sse.com.cn/marketdata/tradedata/queryTradingByProdTypeData.do?jsonCallBack=jsonpCallback30731&searchDate={}&prodType=gp&_=1515717065511'
     api_wrapper = StockSummaryApiWrapper()
 
-    def __init__(self, security_type=SecurityType.index, exchanges=['cn'], codes=['000001'], batch_size=10,
+    def __init__(self, entity_type=EntityType.index, exchanges=['cn'], codes=['000001'], batch_size=10,
                  force_update=False, sleeping_time=5, fetching_style=TimeSeriesFetchingStyle.end_size,
                  default_size=2000) -> None:
-        super().__init__(security_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
+        super().__init__(entity_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
                          default_size)
 
-    def init_timestamps(self, security_item):
-        self.security_timestamps_map[security_item.id] = pd.date_range(start=security_item.timestamp,
-                                                                       end=pd.Timestamp.now(),
-                                                                       freq='B').tolist()
+    def init_timestamps(self, entity):
+        self.security_timestamps_map[entity.id] = pd.date_range(start=entity.timestamp,
+                                                                end=pd.Timestamp.now(),
+                                                                freq='B').tolist()
 
     def generate_request_param(self, security_item, start, end, size, timestamp):
         return to_time_str(timestamp)

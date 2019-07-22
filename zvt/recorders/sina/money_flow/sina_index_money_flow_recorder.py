@@ -4,7 +4,7 @@ import time
 
 import requests
 
-from zvt.domain import SecurityType, IndexMoneyFlow, StockCategory, Provider, TradingLevel, Index
+from zvt.domain import EntityType, IndexMoneyFlow, StockCategory, Provider, IntervalLevel, Index
 from zvt.recorders.recorder import TimeSeriesFetchingStyle, FixedCycleDataRecorder, ApiWrapper
 from zvt.utils.time_utils import to_pd_timestamp
 from zvt.utils.utils import to_float
@@ -67,11 +67,11 @@ class SinaIndexMoneyFlowRecorder(FixedCycleDataRecorder):
     url = 'http://vip.stock.finance.sina.com.cn/quotes_service/api/json_v2.php/MoneyFlow.ssl_bkzj_zjlrqs?page=1&num={}&sort=opendate&asc=0&bankuai={}%2F{}'
     api_wrapper = MyApiWrapper()
 
-    def __init__(self, security_type=SecurityType.index, exchanges=['cn'], codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.index, exchanges=['cn'], codes=None, batch_size=10,
                  force_update=False, sleeping_time=10, fetching_style=TimeSeriesFetchingStyle.end_size,
-                 default_size=4000, contain_unfinished_data=False, level=TradingLevel.LEVEL_1DAY,
+                 default_size=4000, contain_unfinished_data=False, level=IntervalLevel.LEVEL_1DAY,
                  one_shot=True) -> None:
-        super().__init__(security_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
+        super().__init__(entity_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
                          default_size, contain_unfinished_data, level, one_shot)
 
         # 只需要行业和概念

@@ -7,7 +7,7 @@ import pandas as pd
 
 from zvt.domain import Index, Index1DKdata
 from zvt.api.common import generate_kdata_id
-from zvt.recorders.recorder import ApiWrapper, FixedCycleDataRecorder, Provider, SecurityType
+from zvt.recorders.recorder import ApiWrapper, FixedCycleDataRecorder, Provider, EntityType
 from zvt.utils.time_utils import get_year_quarters, is_same_date
 
 
@@ -61,8 +61,8 @@ class ChinaIndexDayKdataRecorder(FixedCycleDataRecorder):
     api_wrapper = SinaIndexKdataApiWrapper()
     url = 'http://vip.stock.finance.sina.com.cn/corp/go.php/vMS_MarketHistory/stockid/{}/type/S.phtml?year={}&jidu={}'
     
-    def __init__(self, security_type=SecurityType.index, exchanges=['cn']):
-        super(ChinaIndexDayKdataRecorder, self).__init__(security_type, exchanges)
+    def __init__(self, entity_type=EntityType.index, exchanges=['cn']):
+        super(ChinaIndexDayKdataRecorder, self).__init__(entity_type, exchanges)
 
     def get_data_map(self):
         return {}

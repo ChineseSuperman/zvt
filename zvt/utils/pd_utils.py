@@ -22,8 +22,8 @@ def index_df(df, index='timestamp', inplace=True, drop=True, index_is_time=True)
 
 def index_df_with_security_time(df):
     df['timestamp'] = pd.to_datetime(df['timestamp'])
-    df = df.set_index(['security_id', 'timestamp'])
-    df.index.names = ['security_id', 'timestamp']
+    df = df.set_index(['entity_id', 'timestamp'])
+    df.index.names = ['entity_id', 'timestamp']
     df = df.sort_index(level=[0, 1])
     return df
 

@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Enum, Float
 
-from zvt.domain import FinanceBase, enum_value, Integer
-from zvt.domain.common import ReportPeriod, Provider
+from zvt.domain import FinanceBase, enum_value, Integer, BaseMixin
+from zvt.domain.common import ReportPeriod
 
 
-class BalanceSheet(FinanceBase):
+class BalanceSheet(FinanceBase, BaseMixin):
     __tablename__ = 'balance_sheet'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))
@@ -446,14 +442,10 @@ class BalanceSheet(FinanceBase):
     # 负债和股东权益总计
 
 
-class IncomeStatement(FinanceBase):
+class IncomeStatement(FinanceBase, BaseMixin):
     __tablename__ = 'income_statement'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))
@@ -607,14 +599,10 @@ class IncomeStatement(FinanceBase):
     fi_income_from_fair_value_change_of_fi_salable = Column(Float)
 
 
-class CashFlowStatement(FinanceBase):
+class CashFlowStatement(FinanceBase, BaseMixin):
     __tablename__ = 'cash_flow_statement'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))
@@ -807,14 +795,10 @@ class CashFlowStatement(FinanceBase):
 
 
 # 主要财务指标
-class FinanceFactor(FinanceBase):
+class FinanceFactor(FinanceBase, BaseMixin):
     __tablename__ = 'finance_factors'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))

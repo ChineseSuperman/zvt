@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import logging
 import os
+from typing import Union
 
 from sqlalchemy import schema
+from sqlalchemy.engine import Engine
 
 from zvt.domain.business import *
 from zvt.domain.coin_meta import *
@@ -25,11 +27,14 @@ _db_session_map = {}
 from sqlalchemy.orm import sessionmaker, Session
 
 
-def get_db_engine(provider, store_category):
-    if isinstance(store_category, StoreCategory):
-        store_category = store_category.value
-    if isinstance(provider, Provider):
-        provider = provider.value
+def get_db_engine(provider: Union[Provider, str],
+                  store_category: Union[StoreCategory, str] = None,
+                  data_schema: object = None) -> Engine:
+    provider = Provider(provider).value
+    if data_schema:
+        store_category = get_store_category(data_schema=data_schema).value
+    else:
+        store_category = StoreCategory(store_category).value
 
     if not os.path.exists(DATA_PATH):
         os.makedirs(DATA_PATH)
@@ -45,15 +50,20 @@ def get_db_engine(provider, store_category):
     return db_engine
 
 
-def get_db_session(provider, store_category) -> Session:
-    return get_db_session_factory(provider, store_category)()
+def get_db_session(provider: Union[Provider, str],
+                   store_category: Union[StoreCategory, str] = None,
+                   data_schema=None) -> Session:
+    return get_db_session_factory(provider, store_category, data_schema)()
 
 
-def get_db_session_factory(provider, store_category):
-    if isinstance(provider, Provider):
-        provider = provider.value
-    if isinstance(store_category, StoreCategory):
-        store_category = store_category.value
+def get_db_session_factory(provider: Union[Provider, str],
+                           store_category: Union[StoreCategory, str] = None,
+                           data_schema=None):
+    provider = Provider(provider).value
+    if data_schema:
+        store_category = get_store_category(data_schema=data_schema).value
+    else:
+        store_category = StoreCategory(store_category).value
 
     session_key = '{}_{}'.format(provider, store_category)
     session = _db_session_map.get(session_key)
@@ -81,7 +91,7 @@ def init_schema():
         if dbs:
             for store_category in dbs:
                 engine = get_db_engine(provider, store_category)
-                # create index for 'timestamp','security_id','code','report_period
+                # create index for 'timestamp','entity_id','code','report_period
                 for table_name, table in iter(category_map_db.get(store_category).metadata.tables.items()):
                     index_list = []
                     with engine.connect() as con:
@@ -91,13 +101,13 @@ def init_schema():
 
                     logger.debug('engine:{},table:{},index:{}'.format(engine, table_name, index_list))
 
-                    for col in ['timestamp', 'security_id', 'code', 'report_period']:
+                    for col in ['timestamp', 'entity_id', 'code', 'report_period']:
                         if col in table.c:
                             column = eval('table.c.{}'.format(col))
                             index = schema.Index('{}_{}_index'.format(table_name, col), column)
                             if index.name not in index_list:
                                 index.create(engine)
-                    for cols in [('timestamp', 'security_id'), ('timestamp', 'code')]:
+                    for cols in [('timestamp', 'entity_id'), ('timestamp', 'code')]:
                         if (cols[0] in table.c) and (col[1] in table.c):
                             column0 = eval('table.c.{}'.format(col[0]))
                             column1 = eval('table.c.{}'.format(col[1]))

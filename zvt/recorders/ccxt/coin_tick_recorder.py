@@ -4,7 +4,7 @@ import logging
 
 from zvt.accounts.ccxt_account import CCXTAccount
 from zvt.api.common import get_kdata_schema, generate_kdata_id
-from zvt.domain import SecurityType, TradingLevel, Provider, to_pd_timestamp, Coin, COIN_EXCHANGES, COIN_PAIRS
+from zvt.domain import EntityType, IntervalLevel, Provider, to_pd_timestamp, Coin, COIN_EXCHANGES, COIN_PAIRS
 from zvt.recorders.recorder import FixedCycleDataRecorder, TimeSeriesFetchingStyle, ApiWrapper
 from zvt.utils.time_utils import to_time_str
 from zvt.utils.utils import init_process_log
@@ -42,7 +42,7 @@ class MyApiWrapper(ApiWrapper):
                         'price': trade['price'],
                         'volume': trade['amount'],
                         'direction': trade['side'],
-                        'orderType': trade['type'],
+                        'orderType': trade['entity_type'],
                         'turnover': trade['price'] * trade['amount']
                     }
                     kdata_list.append(kdata_json)
@@ -62,23 +62,23 @@ class CoinKdataRecorder(FixedCycleDataRecorder):
 
     api_wrapper = MyApiWrapper()
 
-    def __init__(self, security_type=SecurityType.coin, exchanges=['binance'], codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.coin, exchanges=['binance'], codes=None, batch_size=10,
                  force_update=False, sleeping_time=5, fetching_style=TimeSeriesFetchingStyle.end_size,
                  default_size=2000, contain_unfinished_data=False,
                  one_shot=False, start_timestamp=None) -> None:
-        self.data_schema = get_kdata_schema(security_type=security_type, level=TradingLevel.LEVEL_TICK)
+        self.data_schema = get_kdata_schema(entity_type=entity_type, level=IntervalLevel.LEVEL_TICK)
 
         self.start_timestamp = to_pd_timestamp(start_timestamp)
 
-        super().__init__(security_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
-                         default_size, contain_unfinished_data, TradingLevel.LEVEL_TICK, one_shot,
+        super().__init__(entity_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
+                         default_size, contain_unfinished_data, IntervalLevel.LEVEL_TICK, one_shot,
                          kdata_use_begin_time=True)
 
     def get_data_map(self):
         return {}
 
     def generate_domain_id(self, security_item, original_data):
-        return generate_kdata_id(security_id=security_item.id, timestamp=original_data['timestamp'], level=self.level)
+        return generate_kdata_id(entity_id=security_item.id, timestamp=original_data['timestamp'], level=self.level)
 
     def generate_request_param(self, security_item, start, end, size, timestamp):
         if self.start_timestamp:

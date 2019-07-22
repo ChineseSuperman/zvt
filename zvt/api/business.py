@@ -22,7 +22,7 @@ def get_trader(trader_name=None, return_type='df', start_timestamp=None, end_tim
         else:
             filters = [business.Trader.trader_name == trader_name]
 
-    return get_data(data_schema=business.Trader, security_id=None, codes=None, level=None, provider='zvt',
+    return get_data(data_schema=business.Trader, entity_id=None, codes=None, level=None, provider='zvt',
                     columns=None, return_type=return_type, start_timestamp=start_timestamp,
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 
@@ -35,7 +35,7 @@ def get_account(trader_name=None, return_type='df', start_timestamp=None, end_ti
         else:
             filters = [SimAccount.trader_name == trader_name]
 
-    return get_data(data_schema=SimAccount, security_id=None, codes=None, level=None, provider='zvt',
+    return get_data(data_schema=SimAccount, entity_id=None, codes=None, level=None, provider='zvt',
                     columns=None, return_type=return_type, start_timestamp=start_timestamp,
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 
@@ -48,7 +48,7 @@ def get_position(trader_name=None, return_type='df', start_timestamp=None, end_t
         else:
             filters = [Position.trader_name == trader_name]
 
-    return get_data(data_schema=Position, security_id=None, codes=None, level=None, provider='zvt',
+    return get_data(data_schema=Position, entity_id=None, codes=None, level=None, provider='zvt',
                     columns=None, return_type=return_type, start_timestamp=start_timestamp,
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 
@@ -61,7 +61,7 @@ def get_orders(trader_name=None, return_type='df', start_timestamp=None, end_tim
         else:
             filters = [Order.trader_name == trader_name]
 
-    return get_data(data_schema=Order, security_id=None, codes=None, level=None, provider='zvt',
+    return get_data(data_schema=Order, entity_id=None, codes=None, level=None, provider='zvt',
                     columns=None, return_type=return_type, start_timestamp=start_timestamp,
                     end_timestamp=end_timestamp, filters=filters, session=session, order=order, limit=limit)
 

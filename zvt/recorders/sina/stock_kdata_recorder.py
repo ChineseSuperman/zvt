@@ -4,7 +4,7 @@ from scrapy import Selector
 
 from zvt.api.common import generate_kdata_id
 from zvt.api.technical import get_kdata
-from zvt.domain import TradingLevel, SecurityType, Provider, Stock1DKdata, StoreCategory
+from zvt.domain import IntervalLevel, EntityType, Provider, Stock1DKdata, StoreCategory
 from zvt.recorders.recorder import TimeSeriesFetchingStyle, FixedCycleDataRecorder
 from zvt.utils.time_utils import get_year_quarters, is_same_date, to_pd_timestamp
 from zvt.utils.utils import to_float
@@ -16,17 +16,17 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
     store_category = StoreCategory.stock_1d_kdata
     data_schema = Stock1DKdata
 
-    def __init__(self, security_type=SecurityType.stock, exchanges=['sh', 'sz'], codes=None, batch_size=10,
+    def __init__(self, entity_type=EntityType.stock, exchanges=['sh', 'sz'], codes=None, batch_size=10,
                  force_update=False, sleeping_time=5, fetching_style=TimeSeriesFetchingStyle.end_size,
-                 default_size=2000, contain_unfinished_data=False, level=TradingLevel.LEVEL_1DAY,
+                 default_size=2000, contain_unfinished_data=False, level=IntervalLevel.LEVEL_1DAY,
                  one_shot=True) -> None:
-        super().__init__(security_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
+        super().__init__(entity_type, exchanges, codes, batch_size, force_update, sleeping_time, fetching_style,
                          default_size, contain_unfinished_data, level, one_shot)
 
         self.current_factors = {}
         self.latest_factors = {}
         for security_item in self.securities:
-            kdata = get_kdata(security_id=security_item.id, provider=self.provider,
+            kdata = get_kdata(entity_id=security_item.id, provider=self.provider,
                               level=self.level.value, order=Stock1DKdata.timestamp.desc(),
                               return_type='domain',
                               session=self.session)
@@ -37,18 +37,18 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
         return {}
 
     def generate_domain_id(self, security_item, original_data):
-        return generate_kdata_id(security_id=security_item.id, timestamp=original_data['timestamp'], level=self.level)
+        return generate_kdata_id(entity_id=security_item.id, timestamp=original_data['timestamp'], level=self.level)
 
-    def record(self, security_item, start, end, size, timestamps):
+    def record(self, entity_item, start, end, size, timestamps):
         the_quarters = get_year_quarters(start)
         # treat has recorded the season if contains some date
-        if not is_same_date(security_item.timestamp, start) and len(the_quarters) > 1:
+        if not is_same_date(entity_item.timestamp, start) and len(the_quarters) > 1:
             the_quarters = the_quarters[1:]
         for year, quarter in the_quarters:
             kdatas = []
 
             for fuquan in ['bfq', 'hfq']:
-                the_url = self.get_kdata_url(security_item.code, year, quarter, fuquan)
+                the_url = self.get_kdata_url(entity_item.code, year, quarter, fuquan)
                 resp = requests.get(the_url)
 
                 trs = Selector(text=resp.text).xpath(
@@ -68,7 +68,7 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
                         factor = tds[7]
 
                     the_timestamp = to_pd_timestamp(tds[0])
-                    the_id = generate_kdata_id(security_id=security_item.id, timestamp=the_timestamp, level=self.level)
+                    the_id = generate_kdata_id(entity_id=entity_item.id, timestamp=the_timestamp, level=self.level)
 
                     if fuquan == 'hfq':
                         # we got bfq at first and then update hfq data
@@ -81,7 +81,7 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
                             kdata = {
                                 'id': the_id,
                                 'timestamp': the_timestamp,
-                                'name': security_item.name,
+                                'name': entity_item.name,
                                 'level': self.level.value,
                                 'open': to_float(open) / to_float(factor),
                                 'close': to_float(close) / to_float(factor),
@@ -98,13 +98,13 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
                         kdata['hfq_low'] = to_float(low)
                         kdata['factor'] = to_float(factor)
 
-                        self.latest_factors[security_item.id] = to_float(factor)
+                        self.latest_factors[entity_item.id] = to_float(factor)
 
                     else:
                         kdatas.append({
                             'id': the_id,
                             'timestamp': the_timestamp,
-                            'name': security_item.name,
+                            'name': entity_item.name,
                             'level': self.level.value,
                             'open': to_float(open),
                             'close': to_float(close),
@@ -116,22 +116,22 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
 
             return kdatas
 
-    def on_finish(self, security_item):
-        latest_factor = self.latest_factors.get(security_item.id)
+    def on_finish_entity(self, entity):
+        latest_factor = self.latest_factors.get(entity.id)
         # if latest_factor != self.current_factors.get(security_item.id):
         if latest_factor:
-            if latest_factor != self.current_factors.get(security_item.id):
+            if latest_factor != self.current_factors.get(entity.id):
                 sql = 'UPDATE stock_1d_kdata SET qfq_close=hfq_close/{},qfq_high=hfq_high/{}, qfq_open= hfq_open/{}, qfq_low= hfq_low/{} where ' \
-                      'provider =\'{}\' and security_id=\'{}\' and level=\'{}\' and (qfq_close isnull or qfq_high isnull or qfq_low isnull or qfq_open isnull)'.format(
-                    latest_factor, latest_factor, latest_factor, latest_factor, self.provider.value, security_item.id,
+                      'provider =\'{}\' and entity_id=\'{}\' and level=\'{}\' and (qfq_close isnull or qfq_high isnull or qfq_low isnull or qfq_open isnull)'.format(
+                    latest_factor, latest_factor, latest_factor, latest_factor, self.provider.value, entity.id,
                     self.level.value)
             else:
                 sql = 'UPDATE stock_1d_kdata SET qfq_close=hfq_close/{},qfq_high=hfq_high/{}, qfq_open= hfq_open/{}, qfq_low= hfq_low/{} where ' \
-                      'security_id=\'{}\' and level=\'{}\''.format(latest_factor, latest_factor,
-                                                                   latest_factor,
-                                                                   latest_factor,
-                                                                   security_item.id,
-                                                                   self.level.value)
+                      'entity_id=\'{}\' and level=\'{}\''.format(latest_factor, latest_factor,
+                                                                 latest_factor,
+                                                                 latest_factor,
+                                                                 entity.id,
+                                                                 self.level.value)
             self.session.execute(sql)
             self.session.commit()
 
@@ -145,4 +145,4 @@ class StockKdataSinaSpider(FixedCycleDataRecorder):
 
 
 if __name__ == '__main__':
-    StockKdataSinaSpider(exchanges=['sz'], codes=['002937'], level=TradingLevel.LEVEL_1DAY).run()
+    StockKdataSinaSpider(exchanges=['sz'], codes=['002937'], level=IntervalLevel.LEVEL_1DAY).run()

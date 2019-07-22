@@ -3,9 +3,10 @@ import enum
 import math
 
 import pandas as pd
+from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 
-from zvt.utils.time_utils import to_pd_timestamp
+from zvt.utils.time_utils import to_pd_timestamp, now_pd_timestamp
 
 # every base logically means one type of data and physically one db file
 MetaBase = declarative_base()
@@ -156,7 +157,7 @@ def get_store_category(data_schema):
             return category
 
 
-class SecurityType(enum.Enum):
+class EntityType(enum.Enum):
     stock = 'stock'
     index = 'index'
     coin = 'coin'
@@ -206,7 +207,7 @@ class CompanyType(enum.Enum):
     quanshang = 'quanshang'
 
 
-class TradingLevel(enum.Enum):
+class IntervalLevel(enum.Enum):
     LEVEL_TICK = 'tick'
     LEVEL_1MIN = '1m'
     LEVEL_5MIN = '5m'
@@ -218,19 +219,19 @@ class TradingLevel(enum.Enum):
     LEVEL_1WEEK = '1wk'
 
     def to_pd_freq(self):
-        if self == TradingLevel.LEVEL_1MIN:
+        if self == IntervalLevel.LEVEL_1MIN:
             return '1min'
-        if self == TradingLevel.LEVEL_5MIN:
+        if self == IntervalLevel.LEVEL_5MIN:
             return '5min'
-        if self == TradingLevel.LEVEL_15MIN:
+        if self == IntervalLevel.LEVEL_15MIN:
             return '15min'
-        if self == TradingLevel.LEVEL_30MIN:
+        if self == IntervalLevel.LEVEL_30MIN:
             return '30min'
-        if self == TradingLevel.LEVEL_1HOUR:
+        if self == IntervalLevel.LEVEL_1HOUR:
             return '1H'
-        if self == TradingLevel.LEVEL_4HOUR:
+        if self == IntervalLevel.LEVEL_4HOUR:
             return '4H'
-        if self >= TradingLevel.LEVEL_1DAY:
+        if self >= IntervalLevel.LEVEL_1DAY:
             return '1D'
 
     def count_from_timestamp(self, pd_timestamp, one_day_trading_minutes):
@@ -248,35 +249,35 @@ class TradingLevel(enum.Enum):
                                                    one_day_trading_seconds / self.to_second())
 
     def floor_timestamp(self, pd_timestamp):
-        if self == TradingLevel.LEVEL_1MIN:
+        if self == IntervalLevel.LEVEL_1MIN:
             return pd_timestamp.floor('1min')
-        if self == TradingLevel.LEVEL_5MIN:
+        if self == IntervalLevel.LEVEL_5MIN:
             return pd_timestamp.floor('5min')
-        if self == TradingLevel.LEVEL_15MIN:
+        if self == IntervalLevel.LEVEL_15MIN:
             return pd_timestamp.floor('15min')
-        if self == TradingLevel.LEVEL_30MIN:
+        if self == IntervalLevel.LEVEL_30MIN:
             return pd_timestamp.floor('30min')
-        if self == TradingLevel.LEVEL_1HOUR:
+        if self == IntervalLevel.LEVEL_1HOUR:
             return pd_timestamp.floor('1h')
-        if self == TradingLevel.LEVEL_4HOUR:
+        if self == IntervalLevel.LEVEL_4HOUR:
             return pd_timestamp.floor('4h')
-        if self >= TradingLevel.LEVEL_1DAY:
+        if self >= IntervalLevel.LEVEL_1DAY:
             return pd_timestamp.floor('1d')
 
     def is_last_data_of_day(self, hour, minute, pd_timestamp):
-        if self == TradingLevel.LEVEL_1MIN:
+        if self == IntervalLevel.LEVEL_1MIN:
             return pd_timestamp.hour == hour and pd_timestamp.minute + 1 == minute
-        if self == TradingLevel.LEVEL_5MIN:
+        if self == IntervalLevel.LEVEL_5MIN:
             return pd_timestamp.hour == hour and pd_timestamp.minute + 5 == minute
-        if self == TradingLevel.LEVEL_15MIN:
+        if self == IntervalLevel.LEVEL_15MIN:
             return pd_timestamp.hour == hour and pd_timestamp.minute + 15 == minute
-        if self == TradingLevel.LEVEL_30MIN:
+        if self == IntervalLevel.LEVEL_30MIN:
             return pd_timestamp.hour == hour and pd_timestamp.minute + 30 == minute
-        if self == TradingLevel.LEVEL_1HOUR:
+        if self == IntervalLevel.LEVEL_1HOUR:
             return pd_timestamp.hour == hour and pd_timestamp.minute + 60 == minute
-        if self == TradingLevel.LEVEL_4HOUR:
+        if self == IntervalLevel.LEVEL_4HOUR:
             return pd_timestamp.hour == hour and pd_timestamp.minute + 240 == minute
-        if self >= TradingLevel.LEVEL_1DAY:
+        if self >= IntervalLevel.LEVEL_1DAY:
             return True
 
     def to_minute(self):
@@ -287,23 +288,23 @@ class TradingLevel(enum.Enum):
 
     def to_ms(self):
         # we treat tick intervals is 5s, you could change it
-        if self == TradingLevel.LEVEL_TICK:
+        if self == IntervalLevel.LEVEL_TICK:
             return 5 * 1000
-        if self == TradingLevel.LEVEL_1MIN:
+        if self == IntervalLevel.LEVEL_1MIN:
             return 60 * 1000
-        if self == TradingLevel.LEVEL_5MIN:
+        if self == IntervalLevel.LEVEL_5MIN:
             return 5 * 60 * 1000
-        if self == TradingLevel.LEVEL_15MIN:
+        if self == IntervalLevel.LEVEL_15MIN:
             return 15 * 60 * 1000
-        if self == TradingLevel.LEVEL_30MIN:
+        if self == IntervalLevel.LEVEL_30MIN:
             return 30 * 60 * 1000
-        if self == TradingLevel.LEVEL_1HOUR:
+        if self == IntervalLevel.LEVEL_1HOUR:
             return 60 * 60 * 1000
-        if self == TradingLevel.LEVEL_4HOUR:
+        if self == IntervalLevel.LEVEL_4HOUR:
             return 4 * 60 * 60 * 1000
-        if self == TradingLevel.LEVEL_1DAY:
+        if self == IntervalLevel.LEVEL_1DAY:
             return 24 * 60 * 60 * 1000
-        if self == TradingLevel.LEVEL_1WEEK:
+        if self == IntervalLevel.LEVEL_1WEEK:
             return 7 * 24 * 60 * 60 * 1000
 
     def __ge__(self, other):
@@ -328,18 +329,25 @@ class TradingLevel(enum.Enum):
         return NotImplemented
 
 
-enum_value = lambda x: [e.value for e in x]
+def enum_value(x):
+    return [e.value for e in x]
 
-COIN_EXCHANGES = ["binance", "huobipro", "okex"]
 
-# COIN_BASE = ["BTC", "ETH", "XRP", "BCH", "EOS", "LTC", "XLM", "ADA", "IOTA", "TRX", "NEO", "DASH", "XMR",
-#                        "BNB", "ETC", "QTUM", "ONT"]
+class BaseMixin(object):
+    id = Column(String, primary_key=True)
+    entity_id = Column(String)
 
-COIN_BASE = ["BTC", "ETH", "EOS"]
+    # the meaning could be different for different case,most of time it means 'happen time'
+    timestamp = Column(DateTime)
 
-COIN_PAIRS = [("{}/{}".format(item, "USDT")) for item in COIN_BASE] + \
-             [("{}/{}".format(item, "USD")) for item in COIN_BASE]
+
+class Mixin(BaseMixin):
+    # the record created time in db
+    created_timestamp = Column(DateTime, default=now_pd_timestamp())
+    # the record updated time in db, some recorder would check it for whether need to refresh
+    updated_timestamp = Column(DateTime)
+
 
 if __name__ == '__main__':
     # print(provider_map_category.get('eastmoney'))
-    print(TradingLevel.LEVEL_1HOUR.count_from_timestamp(to_pd_timestamp('2019-05-31'), 240))
+    print(IntervalLevel.LEVEL_1HOUR.count_from_timestamp(to_pd_timestamp('2019-05-31'), 240))

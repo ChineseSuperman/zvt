@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 from sqlalchemy import Column, String, DateTime, Enum, Float
 
-from zvt.domain.common import HolderBase, enum_value, ReportPeriod
+from zvt.domain.common import HolderBase, enum_value, ReportPeriod, BaseMixin
 
 
-class TopTenTradableHolder(HolderBase):
+class TopTenTradableHolder(HolderBase, BaseMixin):
     __tablename__ = 'top_ten_tradable_holder'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))
@@ -31,14 +27,10 @@ class TopTenTradableHolder(HolderBase):
     change_ratio = Column(Float)
 
 
-class TopTenHolder(HolderBase):
+class TopTenHolder(HolderBase, BaseMixin):
     __tablename__ = 'top_ten_holder'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))
@@ -58,14 +50,10 @@ class TopTenHolder(HolderBase):
     change_ratio = Column(Float)
 
 
-class InstitutionalInvestorHolder(HolderBase):
+class InstitutionalInvestorHolder(HolderBase, BaseMixin):
     __tablename__ = 'institutional_investor_holder'
 
-    id = Column(String(length=128), primary_key=True)
     provider = Column(String(length=32))
-    # 报告披露的时间
-    timestamp = Column(DateTime)
-    security_id = Column(String(length=128))
     code = Column(String(length=32))
 
     report_period = Column(Enum(ReportPeriod, values_callable=enum_value))

@@ -5,7 +5,7 @@ from ...context import init_context
 
 init_context()
 
-from zvt.domain import TradingLevel
+from zvt.domain import IntervalLevel
 
 
 def test_coin_meta_recorder():
@@ -18,7 +18,7 @@ def test_coin_meta_recorder():
 
 
 def test_1d_kdata_recorder():
-    recorder = CoinKdataRecorder(exchanges=['binance'], codes=['EOS/USDT'], level=TradingLevel.LEVEL_1DAY,
+    recorder = CoinKdataRecorder(exchanges=['binance'], codes=['EOS/USDT'], level=IntervalLevel.LEVEL_1DAY,
                                  one_shot=True)
     try:
         recorder.run()
@@ -27,7 +27,7 @@ def test_1d_kdata_recorder():
 
 
 def test_1h_kdata_recorder():
-    recorder = CoinKdataRecorder(exchanges=['binance'], codes=['EOS/USDT'], level=TradingLevel.LEVEL_1HOUR,
+    recorder = CoinKdataRecorder(exchanges=['binance'], codes=['EOS/USDT'], level=IntervalLevel.LEVEL_1HOUR,
                                  one_shot=True)
     try:
         recorder.run()

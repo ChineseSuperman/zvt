@@ -54,8 +54,9 @@ class ChinaStockListSpider(Recorder):
             print(df[df['list_date'] == '-'])
             df['list_date'] = df['list_date'].apply(lambda x: to_pd_timestamp(x))
             df['exchange'] = exchange
-            df['type'] = 'stock'
-            df['id'] = df[['type', 'exchange', 'code']].apply(lambda x: '_'.join(x.astype(str)), axis=1)
+            df['entity_type'] = 'stock'
+            df['id'] = df[['entity_type', 'exchange', 'code']].apply(lambda x: '_'.join(x.astype(str)), axis=1)
+            df['entity_id'] = df['id']
             df['timestamp'] = df['list_date']
             df = df.dropna(axis=0, how='any')
             df = df.drop_duplicates(subset=('id'), keep='last')
@@ -63,5 +64,5 @@ class ChinaStockListSpider(Recorder):
 
 
 if __name__ == '__main__':
-    spider = ChinaStockListSpider(provider=Provider.EXCHANGE)
+    spider = ChinaStockListSpider(provider=Provider.EASTMONEY)
     spider.run()

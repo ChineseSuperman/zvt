@@ -3,7 +3,7 @@ from typing import List, Union
 
 import pandas as pd
 
-from zvt.domain import SimAccount, TradingLevel, Order
+from zvt.domain import SimAccount, IntervalLevel, Order
 from zvt.reader.reader import DataReader
 
 
@@ -14,7 +14,7 @@ class AccountReader(DataReader):
                  end_timestamp: Union[str, pd.Timestamp] = None,
                  columns: List = None,
                  filters: List = None,
-                 level: TradingLevel = TradingLevel.LEVEL_1DAY,
+                 level: IntervalLevel = IntervalLevel.LEVEL_1DAY,
                  real_time: bool = False,
                  refresh_interval: int = 10,
                  trader_names: List[str] = None) -> None:
@@ -40,7 +40,7 @@ class OrderReader(DataReader):
                  end_timestamp: Union[str, pd.Timestamp] = None,
                  columns: List = None,
                  filters: List = None,
-                 level: TradingLevel = None,
+                 level: IntervalLevel = None,
                  real_time: bool = False,
                  refresh_interval: int = 10,
                  trader_names: List[str] = None) -> None:

@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 from pandas import DataFrame
 
 from zvt.charts import Chart
-from zvt.domain import SecurityType, TradingLevel
+from zvt.domain import EntityType, IntervalLevel
 from zvt.factors.factor import FilterFactor, ScoreFactor
 from zvt.utils.pd_utils import index_df, df_is_not_null, index_df_with_category_time
 from zvt.utils.time_utils import to_pd_timestamp
@@ -16,7 +16,7 @@ from zvt.utils.time_utils import to_pd_timestamp
 class TargetSelector(object):
     def __init__(self,
                  security_list=None,
-                 security_type=SecurityType.stock,
+                 entity_type=EntityType.stock,
                  exchanges=['sh', 'sz'],
                  codes=None,
                  the_timestamp=None,
@@ -24,10 +24,10 @@ class TargetSelector(object):
                  end_timestamp=None,
                  long_threshold=0.8,
                  short_threshold=-0.8,
-                 level=TradingLevel.LEVEL_1DAY,
+                 level=IntervalLevel.LEVEL_1DAY,
                  provider='eastmoney') -> None:
         self.security_list = security_list
-        self.security_type = security_type
+        self.entity_type = entity_type
         self.exchanges = exchanges
         self.codes = codes
         self.provider = provider
@@ -56,10 +56,10 @@ class TargetSelector(object):
         self.keep_long_df: DataFrame = None
         self.keep_short_df: DataFrame = None
 
-        self.init_factors(security_list=security_list, security_type=security_type, exchanges=exchanges, codes=codes,
+        self.init_factors(security_list=security_list, entity_type=entity_type, exchanges=exchanges, codes=codes,
                           the_timestamp=the_timestamp, start_timestamp=start_timestamp, end_timestamp=end_timestamp)
 
-    def init_factors(self, security_list, security_type, exchanges, codes, the_timestamp, start_timestamp,
+    def init_factors(self, security_list, entity_type, exchanges, codes, the_timestamp, start_timestamp,
                      end_timestamp):
         pass
 
@@ -133,7 +133,7 @@ class TargetSelector(object):
         if df_is_not_null(df):
             if timestamp in df.index:
                 target_df = df.loc[[to_pd_timestamp(timestamp)], :]
-                return target_df['security_id'].tolist()
+                return target_df['entity_id'].tolist()
         return []
 
     def get_open_long_targets(self, timestamp):
@@ -178,7 +178,7 @@ class TargetSelector(object):
         if df_is_not_null(df):
             df = df.reset_index()
             df = index_df(df)
-            df = df.sort_values(by=['score', 'security_id'])
+            df = df.sort_values(by=['score', 'entity_id'])
         return df
 
     def draw(self,
